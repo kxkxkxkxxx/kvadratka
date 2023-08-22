@@ -12,13 +12,14 @@ int main(void)
  setlocale(LC_ALL, "Russian");
 
  double a = 0.0, b = 0.0, c = 0.0;
+ int flag = 0;
 
  printf("квадратное уравнение в общем виде: a*x^2+b*x+c=0\n");
  printf("введите коэффициенты a,b,c:\n");
 
  int n = 0;
  n=scanf("%lf %lf %lf", &a, &b, &c);
-
+ for(flag=1;flag < 2;)
  {
  if(n == 3)
   {
@@ -35,6 +36,7 @@ int main(void)
    else
     {
     lin_solution(b, c);
+
     }
    }
   }
@@ -85,13 +87,13 @@ double sqr_solution(double a, double b, double c)
         "введите <n>, чтобы завершить выполнение программы\n");
 
  char ch = 'a';
- ch = getchar();
+ scanf("%c",&ch);
 
  for(;ch != 'y' && ch !='n';)
    {
    printf("введите <y>, чтобы обновить коэффициенты\n"
           "введите <n>, чтобы завершить выполнение программы\n");
-   ch=getchar();
+   scanf("%c",&ch);
    }
 
  if(ch == 'y')
@@ -103,7 +105,7 @@ double sqr_solution(double a, double b, double c)
 
   }
  return flag;
-}      */
+} */
 
 double lin_solution(double b, double c)
 {
