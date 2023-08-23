@@ -1,119 +1,270 @@
 #include <stdio.h>
 #include <TXLib.h>
-#include <locale.h>
 #include <math.h>
+#include <assert.h>
+#include <stdbool.h>
 
-double sqr_solution(double a, double b, double c);
-int message(int flag);
-double lin_solution(double b, double c);
+int Compare_c_(double c);
+int Compare_a(double a);
+int Compare_b(double b);
+int Compare_c(double c);
+int Compare_Discriminant(double Discriminant);
 
-int main(void)
+double Input(double* a, double* b, double* c, int* n_scanf);
+
+int Clear_Buffer();
+int Would_User_Continue(int* Iteration_Variable);
+
+double Square_Equation_Solution(double a, double b, double c,
+                                double* x_1, double* x_2, int* N_Roots);
+double Linear_Equation_Solution(double b, double c,
+                                double* x_1, int* N_Roots);
+
+int Output_Square_Solution(double x_1, double x_2, int N_Roots);
+int Output_Linear_Solution(double x_1, int N_Roots);
+
+int main()
 {
- setlocale(LC_ALL, "Russian");
-
- double a = 0.0, b = 0.0, c = 0.0;
- int flag = 0;
-
  printf("квадратное уравнение в общем виде: a*x^2+b*x+c=0\n");
- printf("введите коэффициенты a,b,c:\n");
 
- int n = 0;
- n=scanf("%lf %lf %lf", &a, &b, &c);
- for(flag=1;flag < 2;)
+ double a = NAN, b = NAN, c = NAN, x_1 = NAN, x_2 = NAN;    // TODO  NAN ++
+ int Iteration_Variable = 0, N_Roots = 0;
+                                    // TODO naming  ++
+ for(; Iteration_Variable < 1; ++Iteration_Variable)
  {
- if(n == 3)
-  {
-  if(a != 0)
-   {
-   sqr_solution(a, b, c);
-   }
-  else
-   {
-   if(fabs(0.0 - b) < 0.000001 && fabs(0.0 - c) < 0.000001)
-    {
-    printf("уравнение имеет бесконечное колличество решений\n");
-    }
-   else
-    {
-    lin_solution(b, c);
+    printf("введите коэффициенты a,b,c:\n");   // TODO format ++
+    int n_scanf = 0;
+// TODO input function ++
+    Input( &a, &b, &c, &n_scanf);
 
+    if(n_scanf == 3)
+    {
+        if(Compare_a(a))    // TODO compare function ++, why do you substract from zero? ++
+        {
+            Square_Equation_Solution(a, b, c, &x_1, &x_2, &N_Roots);
+            Output_Square_Solution(x_1, x_2, N_Roots);
+
+            Clear_Buffer();
+
+            Would_User_Continue(&Iteration_Variable); // Naming ++
+            Clear_Buffer();    // Naming ++
+        }
+        else
+        {
+            Linear_Equation_Solution( b, c, &x_1, &N_Roots);
+            Output_Linear_Solution(x_1, N_Roots);
+
+            Clear_Buffer();
+
+            Would_User_Continue(&Iteration_Variable);
+            Clear_Buffer();
+        }
     }
-   }
-  }
- else
-  {
-  getchar();
-  printf("данные введены некорректно\n");
-  }
+    else
+    {
+        Clear_Buffer();
+        printf("данные введены некорректно\n");
+
+        Would_User_Continue(&Iteration_Variable);
+        Clear_Buffer();
+    }
  }
-
 return 0;
 }
 
-double sqr_solution(double a, double b, double c)
+double Square_Equation_Solution(double a, double b, double c,
+                                double* x_1, double* x_2, int* N_Roots)   // TOOD do not use short names ++
 {
- double D = 0.0;
- double sqr_root_D = 0.0;
- double x_1 = 0.0, x_2 = 0.0;
+    /*assert(std::isfinite(a));
+    assert(std::isfinite(b));
+    assert(std::isfinite(c));
 
- D = b * b - 4.0 * a * c ;
+    assert(x_1 != NULL);
+    assert(x_2 != NULL);
+    assert(x_1 != x_2);*/
 
- if ( D <= 0)
-   printf("корней нет\n");
+    double Discriminant = NAN;
+    Discriminant = b * b - 4 * a * c;
 
- if (fabs(0.0 - D) < 0.000001)
-   {
-   sqr_root_D = sqrt( D );
-   x_1 = ( - b - sqr_root_D )/(2.0 * a);
+    if(Compare_Discriminant(Discriminant))
+    {
+        *x_1 = - b / (2 * a);
+        *N_Roots = 1;
 
-   printf("уравнение имеет 1 корень : x = %lf\n",x_1);
-   }
- if (D >= 0)
-   {
-   sqr_root_D = sqrt( D );
-   x_1 = ( - b - sqr_root_D )/(2 * a);
-   x_2 = ( - b + sqr_root_D )/(2 * a);
+        return *N_Roots;
+    }
+    else if(Discriminant > 0.0)
+    {
+        double Square_Root_Discriminant = NAN;
 
-   printf("уравнение имеет 2 корн€ : x_1 = %lf\nx_2 = %lf\n",x_1, x_2);
-   }
- return x_1;
-}
+        Square_Root_Discriminant = sqrt(Discriminant);
+        *x_1 = (- b + Square_Root_Discriminant) / (2 * a);
+        *x_2 = (- b - Square_Root_Discriminant) / (2 * a);
+        *N_Roots = 2;
 
-/*int message(int flag)
-{
- printf("желаете продолжить?\n");
+        return *N_Roots;
+    }
+    else
+    {   *x_1 = *x_2 = NAN;  //потом помен€ю
+        *N_Roots = 0;
 
- printf("введите <y>, чтобы обновить коэффициенты\n"
-        "введите <n>, чтобы завершить выполнение программы\n");
-
- char ch = 'a';
- scanf("%c",&ch);
-
- for(;ch != 'y' && ch !='n';)
-   {
-   printf("введите <y>, чтобы обновить коэффициенты\n"
-          "введите <n>, чтобы завершить выполнение программы\n");
-   scanf("%c",&ch);
-   }
-
- if(ch == 'y')
-   flag = 1;
- else if(ch == 'n')
-   flag = 2;
- else
-  {
-
-  }
- return flag;
-} */
-
-double lin_solution(double b, double c)
-{
- double x_1 = 0.0 ;
-
- x_1 = - c / b;
- printf("уравнение cводитс€ к линейному и имеет 1 корень : x = %lf\n", x_1);
- return x_1;
+        return *N_Roots;
+    }
 }
 
 
+
+double Linear_Equation_Solution(double b, double c,
+                                double* x_1, int* N_Roots)  // TODO do not use short names  ++
+{
+    if(Compare_b(b) && Compare_c(c))
+    {
+        *x_1 = 1;
+        *N_Roots = 2;
+
+        return *N_Roots;
+    }
+    else if(Compare_b(b) && Compare_c_(c))
+    {
+        *x_1 = -1;
+        *N_Roots = 0;
+
+        return *N_Roots;
+    }
+    else
+    {
+        *x_1 = - c / b;
+        *N_Roots = 1;
+
+        return *N_Roots;
+    }
+}
+
+
+int Would_User_Continue(int* Iteration_Variable)
+{
+    printf("желаете продолжить ?\n"
+           "(введите 'y',чтобы продолжить)\n");
+
+    if(getchar() == 'y')
+       *Iteration_Variable = -1; // TODO use enum
+    else
+       *Iteration_Variable = 0;
+
+    Clear_Buffer();
+    return *Iteration_Variable;
+}
+
+
+int Clear_Buffer()
+{
+    while(getchar() != '\n')
+        getchar();
+    return 0;
+}
+
+
+double Input(double* a, double* b, double* c, int* n_scanf)
+{
+    *n_scanf = scanf("%lf %lf %lf", &*a, &*b, &*c);
+    return *n_scanf;
+}
+
+
+int Compare_a(double a)
+{
+    int Is_a_Zero = 1;
+
+    if(fabs(a) > 0.000001)
+        Is_a_Zero = 1;
+    else
+        Is_a_Zero = 0;
+
+    return Is_a_Zero;
+}
+
+
+int Compare_b(double b)
+{
+    int Is_b_Zero = 1;
+
+    if(fabs(b) < 0.000001)
+        Is_b_Zero = 1;
+    else
+        Is_b_Zero = 0;
+
+    return Is_b_Zero;
+}
+
+
+int Compare_c(double c)
+{
+    int Is_c_Zero = 1;
+
+    if(fabs(c) < 0.000001)
+        Is_c_Zero = 1;
+    else
+        Is_c_Zero = 0;
+
+    return Is_c_Zero;
+}
+
+
+int Compare_c_(double c)
+{
+    int Is_c_Zero = 1;
+
+    if(fabs(c) > 0.000001)
+        Is_c_Zero = 1;
+    else
+        Is_c_Zero = 0;
+
+    return Is_c_Zero;
+}
+
+
+int Compare_Discriminant(double Discriminant)
+{
+    int Is_D_Zero = 1;
+
+    if(fabs(Discriminant) < 0.000001)
+        Is_D_Zero = 1;
+    else
+        Is_D_Zero = 0;
+
+    return Is_D_Zero;
+}
+
+
+int Output_Square_Solution(double x_1, double x_2, int N_Roots)
+{
+    switch(N_Roots)
+    {
+        case 0 : printf("действительных  корней уравнени€ нет\n");
+                 break;
+        case 1 : printf("уравнение имеет 1 корень : x_1 = %lf\n", x_1);
+                 break;
+        case 2 : printf("уравнение имеет 2 корн€ : x_1 = %lf, x_2 = %lf \n", x_1, x_2);
+                 break;
+                 default :
+                    printf("что-то пошло не так...");
+    }
+    return 0;
+}
+
+
+int Output_Linear_Solution(double x_1, int N_Roots)
+{
+    switch(N_Roots)
+    {
+        case 0 : printf("корней нет \n");
+                 break;
+        case 1 : printf("уравнение сводитс€ к линейному и имеет 1 корень : x_1 = %lf\n", x_1);
+                 break;
+        case 2 : printf("уравнение имеет бесконечное колличество корней \n");
+                 break;
+                 default :
+                    printf("что-то пошло не так...");
+    }
+    return 0;
+}
